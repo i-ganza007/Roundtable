@@ -45,6 +45,7 @@ router.post('login/users',async (req,res)=>{
         return res.status(400).json({"Error":error})
     }
     try {
+        // TODO Keep off the main thread and then these async long ops should be in a separate thread 
         const unhashed_pass = await bcrypt.compare
         const data = await prisma.user.findFirst({
             where:{
@@ -61,5 +62,18 @@ router.get('/logged-in',(req,res)=>{})
 
 // TODO Fetching all user and using redis to cache these users 
 
+
+// Delete All_users route (TESTING )☠️
+router.delete('/delete-all',async(req,res)=>{
+    try {
+        console.time('Deleting all users')
+        const data = await prisma.user.deleteMany({})
+        console.timeEnd('Deleting all users')
+        res.status(200).send(`All Data is deleted ${data}`)
+    } catch (error) {
+        console.log(error);
+        res.send('Error occured check console')
+    }
+})
 
 module.exports = {router}

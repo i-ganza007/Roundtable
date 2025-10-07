@@ -3,7 +3,9 @@ const http = require('http')
 const {router}  = require('./router/router')
 const dotenv = require('dotenv')
 // const mongoose = require('mongoose')
-const { specs, swaggerUi } = require('./swagger/swagger-doc');
+const swagger_ui = require('swagger-ui-express')
+
+const { specs } = require('./swagger/swagger-doc');
 dotenv.config()
 
 const app = express()
@@ -13,7 +15,7 @@ const server = http.createServer(app)
 
 
 app.use(express.json())
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+app.use('/api-docs', swagger_ui.serve, swagger_ui.setup(specs));
 app.use(router)
 app.use((req,res,next)=>{
     res.send('Not found route')
