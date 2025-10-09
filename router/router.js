@@ -1,10 +1,12 @@
+// TODO Change the prisma generated file back during production 
 const dotenv = require('dotenv')
 dotenv.config()
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const router = require('express').Router()
-// Use the generated Prisma client output (schema.prisma has `output = "../generated/prisma"`)
-const { PrismaClient } = require('../generated/prisma')
+// Import the generated Prisma client from the standard package location
+// Prisma was generated to ./node_modules/@prisma/client inside the container
+const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const {User,Board,Task,SubTask,UserLogin} = require('../models/schema')
 
