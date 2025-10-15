@@ -4,7 +4,8 @@
   "description": "Trial Express API containing all microservices like redis , sentry , jwt , docker  etc",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev":"node index"
   },
   "repository": {
     "type": "git",

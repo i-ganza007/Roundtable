@@ -2,6 +2,7 @@
 const dotenv = require('dotenv')
 dotenv.config()
 const jwt = require('jsonwebtoken')
+const {UserCreationDefiner} = require('../workers/WorkerDefiner')
 const bcrypt = require('bcrypt')
 const router = require('express').Router()
 // Import the generated Prisma client from the standard package location
@@ -9,6 +10,9 @@ const router = require('express').Router()
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const {User,Board,Task,SubTask,UserLogin} = require('../models/schema')
+
+
+
 
 router.get('/start',(req,res)=>{
     res.send('Router Setup')
@@ -20,19 +24,29 @@ router.post('/create/users',async (req,res)=>{
     if(error){
         return res.status(400).send(`Error Validating ${error}`)
     }
-    const hashed_password = await bcrypt.hash(value.password, 10)
-    console.time('Creating Users')
-    try {
-        let data = await prisma.user.create({
-        data:{...value,password:hashed_password}
-        })   
-        console.timeEnd('Creating Users')
-        console.log(data)
-        return res.status(201).json({id: data.id, username: data.username, email: data.email})
-    } catch (error) {
-        console.error(error)
-        return res.status(500).send(`Error Occured ${error}`)
-    }
+    // const hashed_password = await bcrypt.hash(value.password, 10)
+    // console.time('Creating Users')
+    // try {
+    //     let data = await prisma.user.create({
+    //     data:{...value,password:hashed_password}
+    //     })   
+    //     console.timeEnd('Creating Users')
+    //     console.log(data)
+    //     return res.status(201).json({id: data.id, username: data.username, email: data.email})
+    // } catch (error) {
+    //     console.error(error)
+    //     return res.status(500).send(`Error Occured ${error}`)
+    // }
+    const worker = UserCreationDefiner(value)
+    worker.once('message',(results)=>{
+        if(results.isError){
+            return res.status(404).send(`${results.response} : ${results.message}`)
+        }
+        return res.status(200).send(`${results.response} : ${results.data}`)  
+    })
+    worker.once('error',(err)=>{
+        return res.status(500).send(`Server Error ${err.cause}`)
+    })
 })
 
 // // graceful shutdown for Prisma client
@@ -41,7 +55,10 @@ router.post('/create/users',async (req,res)=>{
 //     process.exit(0)
 // })
 // TODO Finishing unhashing pass and setting up JWT 
-router.post('login/users',async (req,res)=>{
+
+
+
+router.post('/login/users',async (req,res)=>{
     const {error,value} = UserLogin.validate(req.body)
     if(error){
         return res.status(400).json({"Error":error})
